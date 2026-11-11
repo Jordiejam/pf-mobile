@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { type ComponentProps, type ReactNode } from 'react';
+import { type ComponentProps, type ComponentRef, type ReactNode, useRef, useState } from 'react';
 import {
-  Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
   type StyleProp, type TextInputProps, type TextStyle, type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -46,19 +46,41 @@ export function Amount(props: { children: string; color?: string; size?: number;
 
 // Layout
 
+/**
+ * Keeps its contents above the iPhone keyboard. It measures where it sits on screen, so
+ * it works under any header and inside sheets. Android resizes the window by itself.
+ */
+export function KeyboardSpace(props: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
+  const container = useRef<ComponentRef<typeof View>>(null);
+  const [top, setTop] = useState(0);
+  if (Platform.OS !== 'ios') return <View style={[{ flex: 1 }, props.style]}>{props.children}</View>;
+  return (
+    <View ref={container} style={[{ flex: 1 }, props.style]} onLayout={() => container.current?.measureInWindow((_x: number, y: number) => setTop(y))}>
+      <KeyboardAvoidingView behavior="padding" keyboardVerticalOffset={top} style={{ flex: 1 }}>
+        {props.children}
+      </KeyboardAvoidingView>
+    </View>
+  );
+}
+
 export function Screen(props: { children: ReactNode; scroll?: boolean; footer?: ReactNode; padded?: boolean }) {
   const c = useColors();
   const padding = props.padded === false ? 0 : 16;
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={{ flex: 1, backgroundColor: c.background }}>
-      {props.scroll === false ? (
-        <View style={{ flex: 1, padding }}>{props.children}</View>
-      ) : (
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding, paddingBottom: 96, gap: 16 }}>
-          {props.children}
-        </ScrollView>
-      )}
-      {props.footer}
+      <KeyboardSpace>
+        {props.scroll === false ? (
+          <View style={{ flex: 1, padding }}>{props.children}</View>
+        ) : (
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            contentContainerStyle={{ padding, paddingBottom: props.footer ? 24 : 96, gap: 16 }}>
+            {props.children}
+          </ScrollView>
+        )}
+        {props.footer}
+      </KeyboardSpace>
     </SafeAreaView>
   );
 }
@@ -295,17 +317,19 @@ export function Sheet(props: { visible: boolean; onClose: () => void; title: str
   const c = useColors();
   return (
     <Modal visible={props.visible} animationType="slide" transparent onRequestClose={props.onClose}>
-      <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={props.onClose} accessibilityLabel="Close" />
-      <SafeAreaView edges={['bottom']} style={{ backgroundColor: c.background, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '88%' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 20, paddingRight: 8, paddingTop: 8 }}>
-          <T variant="heading" style={{ flex: 1 }}>{props.title}</T>
-          {props.action}
-          <IconButton icon="close" label="Close" onPress={props.onClose} color={c.muted} />
-        </View>
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14 }}>
-          {props.children}
-        </ScrollView>
-      </SafeAreaView>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' }} onPress={props.onClose} accessibilityLabel="Close" />
+        <SafeAreaView edges={['bottom']} style={{ backgroundColor: c.background, borderTopLeftRadius: 20, borderTopRightRadius: 20, maxHeight: '88%' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: 20, paddingRight: 8, paddingTop: 8 }}>
+            <T variant="heading" style={{ flex: 1 }}>{props.title}</T>
+            {props.action}
+            <IconButton icon="close" label="Close" onPress={props.onClose} color={c.muted} />
+          </View>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, paddingTop: 8, gap: 14 }}>
+            {props.children}
+          </ScrollView>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

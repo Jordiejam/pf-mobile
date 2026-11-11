@@ -127,6 +127,8 @@ describe('assistant conversation', () => {
     expect(tools.call('propose_changes', '{"changes": "DROP TABLE"}')).toEqual({ error: 'Send at least one change' });
     expect(tools.call('search_transactions', 'not json')).toEqual({ error: 'The arguments were not valid JSON' });
     expect(tools.call('delete_everything', '{}')).toEqual({ error: 'Unknown tool delete_everything' });
+    expect(tools.call('search_transactions', '{"start": "not a date"}')).toMatchObject({ error: expect.stringContaining('not valid') });
+    expect(tools.call('propose_changes', '{"changes": [null, 7, {"action": "edit", "id": {}, "fields": "x"}]}')).toMatchObject({ shown_to_user: false });
   });
 
   it('reports API failures in words and keeps the conversation usable', async () => {

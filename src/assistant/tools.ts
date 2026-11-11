@@ -153,7 +153,9 @@ export class AssistantTools {
     } catch (error) {
       if (error instanceof LedgerError) return { error: error.message };
       if (error instanceof SyntaxError) return { error: 'The arguments were not valid JSON' };
-      throw error;
+      // Anything else is a malformed request (a bad date, a wrong type). Every command is
+      // atomic, so nothing was changed; the model is told so it can try again.
+      return { error: 'The arguments were not valid. Check dates, ids and amounts, then try again.' };
     }
   }
 

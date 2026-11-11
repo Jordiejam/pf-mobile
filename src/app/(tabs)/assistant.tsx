@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, Stack } from 'expo-router';
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
+import { ScrollView, TextInput, View } from 'react-native';
 import type { ChatItem } from '@/assistant/agent';
 import type { ChangeLine } from '@/core';
 import { useChat, useConnection } from '@/platform/app';
 import { connection } from '@/platform/connection';
-import { Amount, Button, Card, Divider, Empty, IconButton, T } from '@/ui/kit';
+import { Amount, Button, Card, Divider, Empty, IconButton, KeyboardSpace, T } from '@/ui/kit';
 import { useColors } from '@/ui/theme';
 
 const ACTIONS: Record<ChangeLine['action'], string> = {
@@ -131,7 +131,7 @@ export default function AssistantScreen() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={90} style={{ flex: 1, backgroundColor: c.background }}>
+    <KeyboardSpace style={{ backgroundColor: c.background }}>
       <Stack.Screen
         options={{
           headerRight: () => (
@@ -142,7 +142,7 @@ export default function AssistantScreen() {
           ),
         }}
       />
-      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}>
+      <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" contentContainerStyle={{ padding: 16, gap: 10, flexGrow: 1 }}>
         {items.length === 0 && (
           <View style={{ flex: 1, justifyContent: 'center', gap: 10 }}>
             <T muted style={{ textAlign: 'center', marginBottom: 6 }}>
@@ -179,6 +179,6 @@ export default function AssistantScreen() {
           <IconButton icon="arrow-up-circle" label="Send" onPress={() => send()} size={34} color={text.trim() ? c.accent : c.faint} />
         )}
       </View>
-    </KeyboardAvoidingView>
+    </KeyboardSpace>
   );
 }
