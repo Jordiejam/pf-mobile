@@ -74,11 +74,17 @@ export class Assistant {
     this.listeners.forEach((listener) => listener());
   }
 
-  private add(item: ChatItem extends infer T ? (T extends ChatItem ? Omit<T, 'id'> : never) : never) {
-    const added = { ...item, id: this.nextId++ } as ChatItem;
-    this.items.push(added);
+  private add(item: ChatItem extends infer T ? (T extends ChatItem ? Omit<T, 'id'> : never) : never): number {
+    const id = this.nextId++;
+    this.items.push({ ...item, id } as ChatItem);
     this.emit();
-    return added;
+    return id;
+  }
+
+  /** Replaces an item rather than mutating it, so views see that it changed. */
+  private update(id: number, patch: Partial<ChatItem>) {
+    this.items = this.items.map((item) => (item.id === id ? ({ ...item, ...patch } as ChatItem) : item));
+    this.listeners.forEach((listener) => listener());
   }
 
   reset() {
@@ -102,13 +108,14 @@ export class Assistant {
     const mark = this.history.length;
     try {
       for (let round = 0; round < MAX_ROUNDS; round += 1) {
-        let bubble: Extract<ChatItem, { type: 'assistant' }> | null = null;
+        let bubble: number | null = null;
+        let said = '';
         const output = await client.respond(
           { model, instructions: instructions(this.ledger, this.ledger.store.now()), input: this.history, tools: AssistantTools.definitions },
           (delta) => {
-            bubble ??= this.add({ type: 'assistant', text: '' }) as Extract<ChatItem, { type: 'assistant' }>;
-            bubble.text += delta;
-            this.emit();
+            bubble ??= this.add({ type: 'assistant', text: '' });
+            said += delta;
+            this.update(bubble, { text: said });
           },
           this.abort.signal,
         );
@@ -140,25 +147,21 @@ export class Assistant {
     const item = this.items.find((entry) => entry.id === id);
     if (item?.type !== 'proposal' || item.status !== 'pending' || !item.preview.preview_id) return;
     try {
-      item.result = this.ledger.changes.commit(item.preview.preview_id);
-      item.status = 'saved';
-      item.error = undefined;
+      const result = this.ledger.changes.commit(item.preview.preview_id);
+      this.update(id, { status: 'saved', result });
       this.note('The user approved the proposal and it was saved.');
     } catch (error) {
       if (!(error instanceof LedgerError)) throw error;
-      item.error = error.message;
-      item.status = 'discarded';
+      this.update(id, { status: 'discarded', error: error.message });
       this.note(`The user approved the proposal but it could not be saved: ${error.message}`);
     }
-    this.emit();
   }
 
   discard(id: number) {
     const item = this.items.find((entry) => entry.id === id);
     if (item?.type !== 'proposal' || item.status !== 'pending') return;
-    item.status = 'discarded';
+    this.update(id, { status: 'discarded' });
     this.note('The user discarded the proposal. Nothing was saved.');
-    this.emit();
   }
 
   /** Tells the model, on its next turn, what happened to a proposal. */

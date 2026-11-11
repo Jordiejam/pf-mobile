@@ -189,7 +189,11 @@ export function migrate(db: Db) {
       db.exec(`PRAGMA user_version = ${next + 1}`);
       db.exec('COMMIT');
     } catch (error) {
-      db.exec('ROLLBACK');
+      try {
+        db.exec('ROLLBACK');
+      } catch {
+        // Already rolled back by SQLite; the original error is the one that matters.
+      }
       throw error;
     }
   }

@@ -434,6 +434,14 @@ export class LedgerService {
     return totals;
   }
 
+  /** The live refunds received on a purchase, oldest first. */
+  refundsOf(purchaseId: string): Entry[] {
+    return this.store.all<Entry>(
+      `${SELECT_ENTRY} WHERE t.refund_of_id = ? AND t.deleted_at IS NULL ORDER BY t.occurred_at`,
+      [purchaseId],
+    );
+  }
+
   /** Past payees containing some text: those starting with it first, most recent first. */
   payees(text: string, kind: EntryKind, limit = 5): { note: string; category_id: string | null; account_id: string }[] {
     const clean = text.trim().replace(/[\\%_]/g, '\\$&');
