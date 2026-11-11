@@ -285,7 +285,7 @@ function Editor({ params }: { params: Params }) {
                 <Field label={`Rate (${currency} to ${account.currency})`} value={draft.rate} onChangeText={(rate) => set({ rate, exact: '' })} keyboardType="decimal-pad" placeholder={stored?.rate ?? 'e.g. 0.85'} />
               </View>
               <View style={{ flex: 1 }}>
-                <Field label={`Exact ${account.currency}`} value={draft.exact} onChangeText={(exact) => set({ exact, rate: '' })} keyboardType="decimal-pad" placeholder="From your statement" />
+                <Field label={`Exact ${account.currency}`} value={draft.exact} onChangeText={(exact) => set({ exact, rate: '' })} keyboardType="decimal-pad" placeholder="e.g. 17.23" />
               </View>
             </View>
           </View>
