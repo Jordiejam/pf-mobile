@@ -371,8 +371,9 @@ describe('reports', () => {
     ledger.entries.save({ kind: 'income', account_id: a.id, category_id: category('income', 'Salary').id, amount_minor: 3_000, occurred_at: '2026-11-02T10:00:00Z' });
     const months = ledger.reports.months(2, 1, 'GBP');
     expect(months.map((month) => [month.income, month.expense])).toEqual([[0, 1_000], [3_000, 0]]);
-    const worth = ledger.reports.netWorth(3, 1, 'GBP');
-    expect(worth.map((point) => point.total)).toEqual([0, 9_000, 12_000]);
+    // Months before the first entry are left off.
+    const worth = ledger.reports.netWorth(6, 1, 'GBP');
+    expect(worth.map((point) => point.total)).toEqual([9_000, 12_000]);
   });
 });
 

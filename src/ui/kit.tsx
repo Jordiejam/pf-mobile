@@ -95,7 +95,7 @@ export function Rows(props: { children: ReactNode[] }) {
 
 export function Row(props: {
   title: string; subtitle?: string | null; icon?: IconName; iconColor?: string; right?: ReactNode; value?: string;
-  onPress?: () => void; chevron?: boolean; danger?: boolean; dense?: boolean; lines?: number;
+  onPress?: () => void; chevron?: boolean; danger?: boolean; dense?: boolean; lines?: number; indent?: boolean;
 }) {
   const c = useColors();
   return (
@@ -104,7 +104,7 @@ export function Row(props: {
       disabled={!props.onPress}
       accessibilityRole={props.onPress ? 'button' : undefined}
       style={({ pressed }) => ({
-        flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16,
+        flexDirection: 'row', alignItems: 'center', gap: 12, paddingRight: 16, paddingLeft: props.indent ? 36 : 16,
         minHeight: props.dense ? 48 : 56, paddingVertical: 8, opacity: pressed ? 0.6 : 1,
       })}>
       {props.icon && <Ionicons name={props.icon} size={22} color={props.iconColor ?? (props.danger ? c.danger : c.accent)} />}
@@ -245,7 +245,7 @@ export function Field(props: TextInputProps & { label: string; hint?: string; ri
           accessibilityLabel={label}
           placeholderTextColor={c.faint}
           {...input}
-          style={[{ flex: 1, minHeight: 48, paddingHorizontal: 14, paddingVertical: 10, fontSize: 16, color: c.text }, style]}
+          style={[{ flex: 1, minWidth: 0, minHeight: 48, paddingHorizontal: 14, paddingVertical: 10, fontSize: 16, color: c.text }, style]}
         />
         {right}
       </View>

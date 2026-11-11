@@ -171,7 +171,7 @@ export default function AssistantScreen() {
           placeholderTextColor={c.faint}
           multiline
           accessibilityLabel="Message"
-          style={{ flex: 1, minHeight: 44, maxHeight: 140, fontSize: 16, color: c.text, backgroundColor: c.background, borderRadius: 22, paddingHorizontal: 16, paddingTop: 11, paddingBottom: 11 }}
+          style={{ flex: 1, minWidth: 0, minHeight: 44, maxHeight: 140, fontSize: 16, color: c.text, backgroundColor: c.background, borderRadius: 22, paddingHorizontal: 16, paddingTop: 11, paddingBottom: 11 }}
         />
         {busy ? (
           <IconButton icon="stop-circle" label="Stop" onPress={() => assistant.stop()} size={34} />

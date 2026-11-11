@@ -35,6 +35,8 @@ function Flow({ kind }: { kind: 'expense' | 'income' }) {
     [kind, rangeKey, viewId],
   );
   const { breakdown } = data;
+  // Money back can leave a category negative for a period; shares are of what was actually spent.
+  const positive = breakdown.categories.reduce((sum, category) => sum + Math.max(category.total, 0), 0);
   const colour = (index: number) => SERIES[index % SERIES.length];
 
   return (
@@ -84,7 +86,7 @@ function Flow({ kind }: { kind: 'expense' | 'income' }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: colour(index) }} />
                     <T style={{ flex: 1 }} numberOfLines={1}>{category.name}</T>
-                    <T variant="small" muted>{breakdown.total > 0 ? `${Math.round((category.total / breakdown.total) * 100)}%` : ''}</T>
+                    <T variant="small" muted>{category.total > 0 && positive > 0 ? `${Math.round((category.total / positive) * 100)}%` : ''}</T>
                     <Amount>{Money.format(category.total, data.primary)}</Amount>
                   </View>
                   {category.children.map((child) => (

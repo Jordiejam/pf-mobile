@@ -258,7 +258,7 @@ function Editor({ params }: { params: Params }) {
             keyboardType="decimal-pad"
             autoFocus={!existing}
             accessibilityLabel="Amount"
-            style={{ flex: 1, fontSize: 36, fontWeight: '700', color: c.text, minHeight: 72, fontVariant: ['tabular-nums'] }}
+            style={{ flex: 1, minWidth: 0, fontSize: 36, fontWeight: '700', color: c.text, minHeight: 72, fontVariant: ['tabular-nums'] }}
           />
           <Chip label={currency} onPress={draft.kind === 'transfer' ? undefined : () => setSheet('currency')} />
         </View>

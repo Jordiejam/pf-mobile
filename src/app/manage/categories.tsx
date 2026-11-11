@@ -36,7 +36,8 @@ export default function CategoriesScreen() {
             {[parent, ...categories.filter((category) => category.parent_id === parent.id)].map((category) => (
               <Row
                 key={category.id}
-                title={`${category.parent_id ? '      ' : ''}${category.name}`}
+                title={category.name}
+                indent={!!category.parent_id}
                 value={category.archived ? 'Archived' : undefined}
                 onPress={() => setEditing({ existing: category, name: category.name, parentId: category.parent_id })}
                 dense

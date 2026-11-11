@@ -129,7 +129,11 @@ export class ReportService {
         return [account.id, first && first < account.created_at ? first : account.created_at];
       }),
     );
-    return this.recentMonths(count, startDay).map((period) => {
+    const earliest = [...begins.values()].sort()[0];
+    const months = this.recentMonths(count, startDay);
+    // Months before anything existed are left off, keeping at least two points to draw.
+    const from = Math.min(months.findIndex((period) => !earliest || period.end.toISOString() > earliest), months.length - 2);
+    return months.slice(Math.max(from, 0)).map((period) => {
       // The current month is valued as of now rather than at its (future) end.
       const end = period.end.toISOString() > now ? now : new Date(period.end.getTime() - 1).toISOString();
       const point: NetWorthPoint = { period, total: 0, groups: {} };

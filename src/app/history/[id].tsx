@@ -31,6 +31,8 @@ export default function HistoryScreen() {
             const changes = event.action === 'edited' && event.before && event.after
               ? Object.keys(LABELS)
                   .filter((key) => event.before![key] !== event.after![key])
+                  // The original amount only differs from the amount for another currency.
+                  .filter((key) => key !== 'source_amount_minor' || event.after!.source_currency !== event.after!.currency)
                   .map((key) => `${LABELS[key]}: ${show(key, event.before![key], currency)} → ${show(key, event.after![key], currency)}`)
                   .join('\n')
               : undefined;
