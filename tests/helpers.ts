@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { randomUUID } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { Ledger, type Db } from '../src/core';
